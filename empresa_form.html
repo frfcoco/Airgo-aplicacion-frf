@@ -1,0 +1,112 @@
+<div class="card mb-4">
+    <div class="card-header">
+      <strong>Crear Empresa</strong>
+    </div>
+    <div class="card-body">
+      <form id="empresaForm" class="row g-3">
+        <div class="col-md-6">
+          <label for="nombre_comercial" class="form-label">Nombre Comercial</label>
+          <input type="text" class="form-control" id="nombre_comercial" name="nombre_comercial" required>
+        </div>
+        <div class="col-md-6">
+          <label for="razon_social" class="form-label">Razón Social</label>
+          <input type="text" class="form-control" id="razon_social" name="razon_social" required>
+        </div>
+        <div class="col-md-4">
+          <label for="nit" class="form-label">NIT</label>
+          <input type="text" class="form-control" id="nit" name="nit" required>
+        </div>
+        <div class="col-md-4">
+          <label for="telefono" class="form-label">Teléfono</label>
+          <input type="text" class="form-control" id="telefono" name="telefono">
+        </div>
+        <div class="col-md-4">
+          <label for="sigla_empresa" class="form-label">Sigla Empresa</label>
+          <input type="text" class="form-control" id="sigla_empresa" name="sigla_empresa">
+        </div>
+        <div class="col-md-4">
+          <label for="banco" class="form-label">Banco</label>
+          <input type="text" class="form-control" id="banco" name="banco">
+        </div>
+        <div class="col-md-4">
+          <label for="tipo_cuenta" class="form-label">Tipo de Cuenta</label>
+          <input type="text" class="form-control" id="tipo_cuenta" name="tipo_cuenta">
+        </div>
+        <div class="col-md-4">
+          <label for="numero_cuenta" class="form-label">Número de Cuenta</label>
+          <input type="text" class="form-control" id="numero_cuenta" name="numero_cuenta">
+        </div>
+        <div class="col-md-6">
+          <label for="servicio_cliente" class="form-label">Servicio al Cliente</label>
+          <input type="text" class="form-control" id="servicio_cliente" name="servicio_cliente">
+        </div>
+        <div class="col-md-6">
+          <label for="reclamos_pasajeros" class="form-label">Reclamos Pasajeros</label>
+          <input type="text" class="form-control" id="reclamos_pasajeros" name="reclamos_pasajeros">
+        </div>
+        <div class="col-md-4">
+          <label for="ciudad" class="form-label">Ciudad</label>
+          <input type="text" class="form-control" id="ciudad" name="ciudad">
+        </div>
+        <div class="col-md-4">
+          <label for="activo" class="form-label">Activo</label>
+          <select class="form-select" id="activo" name="activo">
+            <option value="1" selected>Sí</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label for="modalidad_1" class="form-label">Modalidad 1</label>
+          <input type="text" class="form-control" id="modalidad_1" name="modalidad_1">
+        </div>
+        <div class="col-md-4">
+          <label for="modalidad_2" class="form-label">Modalidad 2</label>
+          <input type="text" class="form-control" id="modalidad_2" name="modalidad_2">
+        </div>
+        <div class="col-md-6">
+          <label for="equipo_autorizado" class="form-label">Equipo Autorizado</label>
+          <input type="text" class="form-control" id="equipo_autorizado" name="equipo_autorizado">
+        </div>
+        <div class="col-md-6">
+          <label for="especificaciones_operacion" class="form-label">Especificaciones de Operación</label>
+          <input type="text" class="form-control" id="especificaciones_operacion" name="especificaciones_operacion">
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">Guardar Empresa</button>
+        </div>
+        <div class="col-12">
+          <div id="formResult"></div>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <script>
+  document.getElementById('empresaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+  
+    const form = e.target;
+    const data = {};
+    Array.from(form.elements).forEach(el => {
+      if (el.name) data[el.name] = el.value;
+    });
+  
+    fetch('/stage/api/empresa_create.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        document.getElementById('formResult').innerHTML = '<div class="alert alert-success">Empresa creada con éxito (ID: ' + result.id + ')</div>';
+        form.reset();
+      } else {
+        document.getElementById('formResult').innerHTML = '<div class="alert alert-danger">Error: ' + (result.error || 'No se pudo crear la empresa') + '</div>';
+      }
+    })
+    .catch(error => {
+      document.getElementById('formResult').innerHTML = '<div class="alert alert-danger">Error de red o servidor</div>';
+    });
+  });
+  </script>

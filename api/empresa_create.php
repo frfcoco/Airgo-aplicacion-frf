@@ -35,7 +35,7 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 
-    // Build the query dynamically to ensure parameters match
+    // Build the query dynamically to ensure parameters match_frf
     $fields = [
         'nombre_comercial',
         'razon_social',

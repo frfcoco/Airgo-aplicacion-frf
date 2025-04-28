@@ -7,6 +7,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// For debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 $payload = file_get_contents('php://input');
 $data    = json_decode($payload, true);
 
@@ -31,39 +35,54 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 
-    $stmt = $pdo->prepare(
-        "INSERT INTO empresa (
-            nombre_comercial, razon_social, nit, telefono, sigla_empresa, banco, tipo_cuenta, numero_cuenta,
-            servicio_cliente, reclamos_pasajeros, ciudad, activo, modalidad_1, modalidad_2, equipo_autorizado, especificaciones_operacion
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-    );
+    // Build the query dynamically to ensure parameters match
+    $fields = [
+        'nombre_comercial',
+        'razon_social',
+        'nit',
+        'telefono',
+        'sigla_empresa',
+        'banco',
+        'tipo_cuenta',
+        'numero_cuenta',
+        'servicio_cliente',
+        'reclamos_pasajeros',
+        'ciudad',
+        'activo',
+        'modalidad_1',
+        'modalidad_2',
+        'equipo_autorizado',
+        'especificaciones_operacion'
+    ];
 
-    $stmt->execute([
-        $data['nombre_comercial'],
-        $data['razon_social'],
-        $data['nit'],
-        $data['telefono'] ?? null,
-        $data['sigla_empresa'] ?? null,
-        $data['banco'] ?? null,
-        $data['tipo_cuenta'] ?? null,
-        $data['numero_cuenta'] ?? null,
-        $data['servicio_cliente'] ?? null,
-        $data['reclamos_pasajeros'] ?? null,
-        $data['ciudad'] ?? null,
-        $data['activo'] ?? 1,
-        $data['modalidad_1'] ?? null,
-        $data['modalidad_2'] ?? null,
-        $data['equipo_autorizado'] ?? null,
-        $data['especificaciones_operacion'] ?? null
-    ]);
+    $placeholders = str_repeat('?,', count($fields) - 1) . '?';
+    
+    $sql = "INSERT INTO empresa (" . implode(', ', $fields) . ") 
+            VALUES (" . $placeholders . ")";
+
+    $stmt = $pdo->prepare($sql);
+
+    // Build the values array in the same order as fields
+    $values = [];
+    foreach ($fields as $field) {
+        $values[] = $data[$field] ?? null;
+    }
+
+    $stmt->execute($values);
 
     echo json_encode([
         'success' => true,
-        'id' => $pdo->lastInsertId()
+        'id' => $pdo->lastInsertId(),
+        'sql' => $sql,  // For debugging
+        'values' => $values  // For debugging
     ]);
 
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode([
+        'error' => $e->getMessage(),
+        'sql' => $sql ?? null,  // For debugging
+        'values' => $values ?? null  // For debugging
+    ]);
 }
 ?>
